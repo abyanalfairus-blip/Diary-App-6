@@ -1,66 +1,78 @@
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { ColorValue } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { useDiary } from '../../src/context/DiaryContext';
+import { COLORS } from '../../src/styles/tokens';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+type IconName = React.ComponentProps<typeof SymbolView>['name'];
+
+function TabIcon({ name, color }: { name: IconName; color: ColorValue }) {
+  return <SymbolView name={name} tintColor={color} size={24} />;
+}
+
+export default function TabsLayout() {
+  // Jumlah Like dibaca dari Context, dan badge tab Favorites ikut berubah otomatis.
+  const { likedIds } = useDiary();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarActiveTintColor: COLORS.accent,
+        tabBarInactiveTintColor: COLORS.subtle,
+        tabBarStyle: {
+          backgroundColor: COLORS.surface,
+          borderTopColor: COLORS.border,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        sceneStyle: { backgroundColor: COLORS.background },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
+          title: 'Home',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
-          ),
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable style={{ marginRight: 15 }}>
-                {({ pressed }) => (
-                  <SymbolView
-                    name={{ ios: 'info.circle', android: 'info', web: 'info' }}
-                    size={25}
-                    tintColor={Colors[colorScheme].text}
-                    style={{ opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+            <TabIcon name={{ ios: 'house.fill', android: 'home', web: 'home' }} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="favorites"
         options={{
-          title: 'Tab Two',
+          title: 'Favorit',
+          tabBarBadge: likedIds.size > 0 ? likedIds.size : undefined,
+          tabBarBadgeStyle: { backgroundColor: COLORS.danger },
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
+            <TabIcon
+              name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: 'Tambah',
+          tabBarIcon: ({ color }) => (
+            <TabIcon
+              name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Pengaturan',
+          tabBarIcon: ({ color }) => (
+            <TabIcon
+              name={{ ios: 'gearshape.fill', android: 'settings', web: 'settings' }}
+              color={color}
             />
           ),
         }}
